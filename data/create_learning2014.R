@@ -75,3 +75,13 @@ learning2014 <- filter(learning2014, surf != 0)
 learning2014 <- filter(learning2014, Points != 0)
 dim(learning2014)
 
+# Save the new dataset into a file and read it
+write.csv(learning2014,"C:/Users/Heli/Heli/HY/Introduction to Open Data Science/Projects/IODS-project/data\\learning2014.csv", row.names = FALSE)
+Newcsv <- read.csv("C:/Users/Heli/Heli/HY/Introduction to Open Data Science/Projects/IODS-project/data\\learning2014.csv", sep=",", dec = ".", quote="", header=TRUE)
+
+dim(Newcsv)
+str(Newcsv)
+
+#write.table(learning2014,"C:/Users/Heli/Heli/HY/Introduction to Open Data Science/Projects/IODS-project/data\\learning2014.txt", row.names = FALSE)
+#Newtxt <- read.table("C:/Users/Heli/Heli/HY/Introduction to Open Data Science/Projects/IODS-project/data\\learning2014.txt", sep="\t", dec = ".",quote="",header=TRUE)
+
