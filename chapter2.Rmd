@@ -77,3 +77,66 @@ qplot(attitude, Points, data = ds) + geom_smooth(method = "lm")
 my_model <- lm(Points  ~ attitude + deep + Age, data = ds )
 summary(my_model)
 ```
+Residuals explain the minimum and maximum values that are -16.0562 and 10.7479. It also shows that the median is 0.2952, the first quatrain is -3.7634 and the third is 4.6517.
+The t-value measures the size of the difference relative to the variation, so the bigger the number the greater the evidence against the null hypothesis. Age seems to have the biggest difference (-1.197) but still not big enough to refute the 0-hypotheses. The t-value cannot refute null hypotheses, not statistically significant.
+p-value (Pr) is smallest with Age (0.233) but still bigger than 0.05 so none of these are statistically significant.
+Based on the results, null hypotheses cannot be refute.
+Residual standard error is 5.921. R-squared values indicate explain how well the variance is explained by the model.
+Multiple R-squared (0.009356) and	Adjusted R-squared (-0.008989) are almost the same and explaind the variant very poorely. 
+```{r}
+my_model <- lm(Points  ~ stra + surf +gender, data = ds )
+summary(my_model)
+```
+```{r}
+confint(my_model)
+```
+```{r}
+my_model <- lm(Points  ~ attitude, data = ds )
+summary(my_model)
+```
+NOt significant
+```{r}
+my_model <- lm(Points  ~ deep, data = ds )
+summary(my_model)
+```
+Not significant
+```{r}
+my_model <- lm(Points  ~ Age, data = ds )
+summary(my_model)
+```
+Not significant
+```{r}
+my_model <- lm(Points  ~ stra, data = ds )
+summary(my_model)
+```
+Not significant
+```{r}
+my_model <- lm(Points  ~ surf, data = ds )
+summary(my_model)
+```
+Not significant
+```{r}
+my_model <- lm(Points  ~ gender, data = ds )
+summary(my_model)
+```
+Not significant.
+We choose stra for further investigation. (biggest t-value)
+```{r}
+my_model <- lm(Points  ~ stra, data = ds )
+plot(ds$stra,ds$Points)
+abline(my_model, col="red")
+my_model
+summary(my_model)
+```
+```{r}
+qqnorm(ds$Points, pch = 1, frame = FALSE)
+qqline(ds$Points, col = "steelblue", lwd = 2)
+```
+```{r}
+plot(lm(Points~stra,data=ds)) 
+```
+The assumption is that the strategic approach (stra) defines the overall points (Points).
+Residual is the difference between an observed value of the response variable and the fitted value, the error.
+y the assumptions of normality and
+constant variance can be assessed.
+
