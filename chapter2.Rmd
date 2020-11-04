@@ -135,8 +135,15 @@ qqline(ds$Points, col = "steelblue", lwd = 2)
 ```{r}
 plot(lm(Points~stra,data=ds)) 
 ```
-The assumption is that the strategic approach (stra) defines the overall points (Points).
-Residual is the difference between an observed value of the response variable and the fitted value, the error.
-y the assumptions of normality and
-constant variance can be assessed.
+
+The assumption is that the strategic approach (stra) defines the overall points (Points): Points is modelled as a linear combination of stra.
+Residual is the difference between an observed value of the response variable and the fitted value, the error. Residuals can be used to define the validity of the model assumptions. 
+There are several assumptions for the errors. First of them is that they are normally distributed.
+QQ-plot of the residuals is a method to explore the assumption that the errors of the model are normally distributed.
+The better the data points aline with the line the better they are normally distributed.
+In our example QQ-plot the beginning and end of the line do not follow but in the middle the data point are quite well following the line. We could say the errors are well fitting the line with values -1 and 1.5, reasonably well with values less than -1, not so well fitting with values larger than 1.5. Therefore the errors are reasonable well normally distributed.
+The second assumption is the constant variance of errors, the size of the errors is not dependent on the explanatory variables. This can be explored with a scatter plot of residuals versus model predictions. Any patter in the scatter plot implies that there is a problem with this assumption. In our example there is no patter to be found and therefore this assumption is correct.
+Leverage is used to measure how much impact an observation has to the model. Residuals vs leverage plot can be used to find observations that have unusually high impact, the outliers. In our example there are no outliers.
+
+
 
