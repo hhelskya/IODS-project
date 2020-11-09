@@ -1,0 +1,21 @@
+---
+title: "chapter3, Logistic regression"
+output: html_document
+author: Heli Helskyaho
+
+---
+
+## Logistic regression (CH 3)
+## Heli Helskyaho
+
+```{r}
+date()
+alc <- read.csv("C:/Users/Heli/Heli/HY/Introduction to Open Data Science/Projects/IODS-project/data\\alc.csv",sep=",", header=TRUE)
+
+dim(alc)
+str(alc)
+summary(alc)
+
+```
+
+
