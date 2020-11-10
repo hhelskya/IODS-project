@@ -12,10 +12,49 @@ author: Heli Helskyaho
 date()
 alc <- read.csv("C:/Users/Heli/Heli/HY/Introduction to Open Data Science/Projects/IODS-project/data\\alc.csv",sep=",", header=TRUE)
 
+colnames(alc)
 dim(alc)
 str(alc)
 summary(alc)
 
 ```
+My assumption is that going out (goout), and absences (absences) increase the consumption of alcohol whereas the more time spent on studies (studytime) and other activities (activities) the lower the consumption is.
+```{r}
+library(tidyr); library(dplyr); library(ggplot2)
+glimpse(alc)
+gather(alc) %>% glimpse
+g <- gather(alc) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free")
+```
+```{r}
+g + geom_bar()
+```
+Key-value pairs of the data.
+
+
+
+
+```{r}
+my_model <- lm(alc_use  ~ goout + absences + studytime + activities, data = alc )
+summary(my_model)
+```
+The t-value measures the size of the difference relative to the variation, so the bigger the number the greater the evidence against the null hypothesis. Goout, absences, and studytime have t-value great enough to refute the 0-hypotheses. p-value (Pr) is less than 0.05 for all those three.
+Based on the results, null hypotheses can be refute for goout, absence, and studytime. It cannot be refute for activities. We will build the model without activities.
+As expected it looks like goout and absences increse the alcohol consumption and studytime degreses it. Activities do not seen to have a clear affect.
+```{r}
+my_model <- lm(alc_use  ~ goout + absences + studytime, data = alc )
+summary(my_model)
+```
+alcohol consumption = 1.28 + 0.31*goout + 0.03*absences
+
+Residual Standard Error: Standard deviation of residuals / errors of the regression model.
+Multiple R-Squared: Percent of the variance of exam intact after subtracting the error of the model.
+Adjusted R-Squared: how well the model fits the data, i.e. the percentage of the dependent variable variation that the linear model explains (ranging between 0 and 1). 
+The R-squared (0.22) is quite low so there is probably something in residual plots we should investigate. 
+```{r}
+par(mfrow = c(2,2))
+plot(my_model, which=c(1,2,5))
+```
+The residual vs Fitted shows that the residuals are not very close to the regression line. QQ-plot shows that the datapoints follow the regression line well in hte middle but in the beginning and end they do not.
+Residulas vs leverage plot shows most of the points in the beginning of the libe. Most likely the model is not linear. There are no points outside the Cook's distance.
 
 
