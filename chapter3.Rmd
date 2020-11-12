@@ -5,8 +5,8 @@ author: Heli Helskyaho
 
 ---
 
-## Logistic regression (CH 3)
-## Heli Helskyaho
+# Logistic regression
+
 
 ```{r}
 date()
@@ -34,27 +34,153 @@ Key-value pairs of the data.
 
 
 ```{r}
-my_model <- lm(alc_use  ~ goout + absences + studytime + activities, data = alc )
+my_model <- lm(high_use  ~ goout + absences + studytime + activities, data = alc )
 summary(my_model)
 ```
 The t-value measures the size of the difference relative to the variation, so the bigger the number the greater the evidence against the null hypothesis. Goout, absences, and studytime have t-value great enough to refute the 0-hypotheses. p-value (Pr) is less than 0.05 for all those three.
 Based on the results, null hypotheses can be refute for goout, absence, and studytime. It cannot be refute for activities. We will build the model without activities.
 As expected it looks like goout and absences increse the alcohol consumption and studytime degreses it. Activities do not seen to have a clear affect.
 ```{r}
-my_model <- lm(alc_use  ~ goout + absences + studytime, data = alc )
-summary(my_model)
+my_model2 <- lm(high_use  ~ goout + absences + studytime, data = alc )
+summary(my_model2)
 ```
-alcohol consumption = 1.28 + 0.31*goout + 0.03*absences
+alcohol consumption = 0.01 + 0.13 * goout + 0.01 * absences - 0.10 * studytime
 
 Residual Standard Error: Standard deviation of residuals / errors of the regression model.
 Multiple R-Squared: Percent of the variance of exam intact after subtracting the error of the model.
 Adjusted R-Squared: how well the model fits the data, i.e. the percentage of the dependent variable variation that the linear model explains (ranging between 0 and 1). 
-The R-squared (0.22) is quite low so there is probably something in residual plots we should investigate. 
+The R-squared is quite low so there is probably something in residual plots we should investigate. 
 ```{r}
 par(mfrow = c(2,2))
-plot(my_model, which=c(1,2,5))
+plot(my_model2, which=c(1,2,5))
 ```
-The residual vs Fitted shows that the residuals are not very close to the regression line. QQ-plot shows that the datapoints follow the regression line well in hte middle but in the beginning and end they do not.
-Residulas vs leverage plot shows most of the points in the beginning of the libe. Most likely the model is not linear. There are no points outside the Cook's distance.
+The residual vs Fitted shows that the residuals are not at all on the regression line. QQ-plot shows that the datapoints really do not follow the regression line well.
+Residulas vs leverage plot shows most of the points in the beginning of the line. Most likely the model is not linear. (There are no points outside the Cook's distance, so no big outliers.)
+```{r}
+# grouping the data by goout, absences and studytime. counting the count and the mean of alc_use.
+alc %>% group_by(goout, absences, studytime) %>% summarise(count = n(), mean_grade=mean(high_use))
+```
+Those with 0 or 1 as mean_grade are low and high in comsumption but other values have variance. For example if we see a student with go out=5, absences=19, and studytime=2, the data shows high consumption. But a student with the same go out and studytime but even more absence (21) shows low consumptiton. Since there are no outliers this must be a true data point and the regression is not linear. 
+```{r}
+library(ggplot2)
+g1 <- ggplot(alc, aes(x = high_use, y = goout))
+g1 + geom_boxplot() + ylab("go out")
+```
+Base on the box plot is shows that high_use and going out a lot have a correlation.
+```{r}
+g2 <- ggplot(alc, aes(x = high_use, y = absences))
+g2 + geom_boxplot() + ylab("absences")
+```
+Based on the box plot it loos like more absences means more alcohol consumption. There are some exceptions though.
+```{r}
+g3 <- ggplot(alc, aes(x = high_use, y = studytime))
+g3 + geom_boxplot() + ylab("study time")
+```
+Base on this box plot the more students spent time on studying the less they consume alcohol.
+Let's build a logistic model (my_model3).
+```{r}
+my_model3 <- glm(high_use ~ goout + absences + studytime, data = alc, family = "binomial")
+summary(my_model3)
+```
 
+Let's see the coefficients of the model.
+```{r}
+coef(my_model3)
+```
+goout nad studytime has stronger coeffience on high_use than absences.
+```{r}
+# compute odds ratios (OR)
+OR <- coef(my_model3) %>% exp
+# compute confidence intervals (CI)
+CI <- confint(my_model3) %>% exp
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+```
+Odds Ratio is a measure of the strength of association with an exposure and an outcome. OR > 1 means greater odds of association with the exposure and outcome, the X is positively associated with "success" in our case high consumption of alcohol. Goout clearly has great odds, absences not that clear (1.07 > 1) but still has, and studytime (<1) means lower odds of association between the exposure and outcome. 
+Confidence intervals (2.5 and 97.5) shows the confidence of odds ratio.
+
+```{r}
+# predict() the probability of high_use
+probabilities <- predict(my_model3, type = "response")
+# add the predicted probabilities to 'alc'
+alc <- mutate(alc, probability = probabilities)
+# use the probabilities to make a prediction of high_use
+alc <- mutate(alc, prediction = probability > 0.5)
+# see the first ten original classes, predicted probabilities, and class predictions
+select(alc, failures, absences, sex, high_use, probability, prediction) %>% head(10)
+```
+This shows the prediction and the probability to that prediction. Prediction is compared to the true value (high_use) to see how good it is.
+```{r}
+# create the confusion matrix, tabulate the target variable versus the predictions
+table(high_use = alc$high_use, prediction = alc$prediction)
+```
+The number of correct predictions for false (true negatives) is 246 and the incorrect (false positives) is 22. 
+The number of correct predictions for true (true positives) is 48 and the incorrect (false negatives) is 66. The model can predict students that do not consume high amount of alcohol quite well but it cannot predict those consuming a lot as well.
+```{r}
+# initialize a plot of 'high_use' versus 'probability' in 'alc'
+g11 <- ggplot(alc, aes(x = probability, y = high_use ))
+
+g11 + geom_point(aes(col = prediction)) + ylab("high use")
+
+```
+
+```{r}
+# confusion matrix with probabilities
+table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table() %>% addmargins()
+```
+This proves the analyses made earlier: the prediction for false sís much better than the one for true.
+
+```{r}
+# define a loss function (mean prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+# call loss_func to compute the average number of wrong predictions in the (training) data
+loss_func(class = alc$high_use, prob = 0)
+```
+The probability for a wrong prediction is about 30%.
+```{r}
+loss_func(class = alc$high_use, prob = 1)
+```
+And the probability for a correct prediction is about 70%.
+
+```{r}
+# probability based on the column probability
+loss_func(class = alc$high_use, prob = alc$probability)
+```
+explain...
+```{r}
+# 10-fold cross-validation
+library(boot)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = my_model3, K = 10)
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+The error rate is a little bit better (0.24) than the one in DataCamp (0.26).
+```{r}
+# 10-fold cross-validation for different models
+# "school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet",
+# "guardian","traveltime","studytime","failures","schoolsup","famsup","paid","activities","higher","romantic",
+# "famrel","freetime","goout","Dalc","Walc","health","absences","G1","G2","G3","alc_use","high_use"
+my_model4 <- glm(high_use ~ school + sex + age + Pstatus + Medu + Fedu + Mjob + Fjob + reason + nursery + internet + guardian + traveltime + studytime + failures + schoolsup + famsup + paid + activities + higher + romantic + famrel + freetime + goout + health + absences + G1 + G2+ G3, data = alc, family = "binomial")
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = my_model4, K = 10)
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+Using a model with many predictors is not useful since the error rate is higher than for the model with less predictors.
+```{r}
+my_model5 <- glm(high_use ~ sex + age + internet + guardian + traveltime + studytime + failures + schoolsup + famsup + paid + activities + higher + romantic + famrel + freetime + goout + health + absences + G1 + G2+ G3, data = alc, family = "binomial")
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = my_model5, K = 10)
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+The error rate gets smaller when reducing the predictors (those that have no correlation to high_usage).
+```{r}
+my_model6 <- glm(high_use ~ sex + age + internet + guardian + traveltime + studytime + failures + schoolsup + famsup + activities + higher + romantic + freetime + goout + health + absences + G1 + G2+ G3, data = alc, family = "binomial")
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = my_model6, K = 10)
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+The error rate gets smaller when reducing the predictors (those that have no correlation to high_usage).
 

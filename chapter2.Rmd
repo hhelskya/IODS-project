@@ -1,5 +1,5 @@
 # Regression and model validation
-# Heli Helskyaho
+
 
 *Describe the work this week and summarize your learning.*
 
@@ -20,10 +20,10 @@ The dataset contains 166 rows and  7 columns.
 It includes the gender (F/M), the age, the points and some combination variables built using mean. 
 These variables and the original variables they are combined are:
 
-# attitude: Aa, Ab, Ac, Ad, Ae, Af
-# deep: D03+D11+D19+D27, D07+D14+D22+D30, D06+D15+D23+D31
-# surf: SU02+SU10+SU18+SU26, SU05+SU13+SU21+SU29, SU08+SU16+SU24+SU32
-# stra: ST01+ST09+ST17+ST25, ST04+ST12+ST20+ST28
+attitude: Aa, Ab, Ac, Ad, Ae, Af
+deep: D03+D11+D19+D27, D07+D14+D22+D30, D06+D15+D23+D31
+surf: SU02+SU10+SU18+SU26, SU05+SU13+SU21+SU29, SU08+SU16+SU24+SU32
+stra: ST01+ST09+ST17+ST25, ST04+ST12+ST20+ST28
 
 Gender is of type chr, age and points are of type int and the rest of the variables are of type num as shown here:
 'data.frame':	166 obs. of  7 variables:
