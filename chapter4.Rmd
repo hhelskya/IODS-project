@@ -141,7 +141,22 @@ Let's train a Linear Discriminant analysis (LDA) classification model. Crime is 
 lda.fit <- lda(crime ~ . , data = train)
 lda.fit
 ```
-LD1 seems to be 95.76% whereas the other LDs are not very good.
+Prior probabilities of groups: the proportion of training observations in each group. 
+Prior probabilities of groups:
+      low   med_low  med_high      high 
+0.2301980 0.2475248 0.2549505 0.2673267 
+
+The observations are quite equalli distributed to all the groups (all in the range of 23%-27%).
+
+Group means: group center of gravity, the mean of each variable in each group.
+
+Coefficients of linear discriminants: the linear combination of predictor variables that are used to form the LDA decision rule. For example LD1 = 0.13*zn + 0.04*indus - 0.11*chas + 0.37*nox - 0.16*rm + 0.22*age - 0.08*dis + 3.42*rad + 0.01*tax + 0.11*ptratio - 0.12*black + 0.17*lstat + 0.16*medv
+Proportion of trace is the percentage separation achieved by each discriminant function:
+   LD1    LD2    LD3 
+0.9576 0.0328 0.0096
+
+LD1 seems to be 95.76% whereas the other LDs are not very high.
+
 Let's define the arrows, create a numeric vector of the train sets crime classes, and draw a biplot
 
 ```{r}
