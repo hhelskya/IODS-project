@@ -1,0 +1,160 @@
+---
+title: "chapter5"
+author: "Heli Helskyaho"
+date: "11/23/2020"
+output: html_document
+---
+
+
+# Dimensionality reduction techniques
+
+```{r}
+human <- read.csv("C:/Users/Heli/Heli/HY/Introduction to Open Data Science/Projects/IODS-project/data\\human2.csv", sep=",", dec = ".", header=TRUE)
+human
+dim(human)
+```
+
+Show a graphical overview of the data and show summaries of the variables in the data. Describe and interpret the outputs, commenting on the distributions of the variables and the relationships between them.
+```{r}
+library(GGally)
+library(ggplot2)
+p <- ggpairs(human, mapping = aes(), lower = list(combo = wrap("facethist", bins = 20)))
+p
+```
+
+Based on the summary data and the ggpairs we can see that ExpectYrsEdu is almost normally distributed, labM quite. The rest of the data is not. There is a good correlation on BirthRate and MMratio, ExpectYrsEdu and MMRatio, ExpectYrsEdu and BirthRate, LifeExpect and MMRatio, LifeExpect and edu2F, MMRatio and edu2F. 
+```{r}
+summary(human)
+pairs(human)
+```
+
+Similar interpretations can be made from the pairs as we did on the previous phase.
+
+```{r}
+library(corrplot)
+library(tidyverse)
+# calculate the correlation matrix and round it
+cor_matrix<-cor(human) 
+
+# print the correlation matrix
+corrplot(cor_matrix, method="circle")
+```
+
+The correlations can be seen more clearly on a corrplot chart.
+A strong positive correlation can be seen between BirthRate and MMRatio, ExpectedYrsEd and edu2F, ExpectedYrsEd and LifeExpected, LifeExpect and edu2F, LifeExpect and ExpectYrsEdu.
+A strong negative correlation can be seen between BirthRate and edu2F, BirthRate and LifeExpectYrs, BirthRate and LifeExpectYrsEd, MMRatio and edu2F, MMRatio and LifeExpectYrs, MMRatio and LifeExpectYrsEdu.
+
+Perform principal component analysis (PCA) on the not standardized human data.
+Show the variability captured by the principal components. Draw a biplot displaying the observations by the first two principal components.
+
+```{r}
+pca_human <- prcomp(human)
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+```
+
+This really does not tell us anything since all the arrows are a mess. We need to standardize the variables in the human data and repeat the above analysis.
+
+```{r}
+human_std <- scale(human)
+pca_human_std <- prcomp(human_std)
+biplot(pca_human_std, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+```
+
+The same correlation as described earlier can be seen here.
+Arrows pointing to the same direction are positive correlation and the closer they are the stronger the correlation is. Arrows pointing to opposite directions identify negative correlation.
+
+The angle between a variable and a PC axis can be interpret as the correlation between the two.
+The length of the arrows are proportional to the standard deviations of the variables
+
+Create a summary of the PCA, rounded percentages of variance captured by each PC
+
+```{r}
+s <- summary(pca_human_std)
+pca_pr <- round(100*s$importance[2, ], digits = 5)
+pca_pr
+```
+
+PC1 captures 53% and PC2 12% of the variables.
+
+```{r}
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+biplot(pca_human_std, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+```
+
+This diagram shows the PC1 and PC2 with their importance.
+
+Next we will load the tea dataset from the package FactomineR and explore the data briefly.
+
+```{r}
+library(FactoMineR)
+data("tea")
+str(tea)
+```
+
+There are 300 rows and 36 variables in the tea dataset. Age is of type int but the rest of the variables are of type factor.
+
+```{r}
+summary(tea)
+```
+
+There are many variables (36) which makes analyzing the data more difficult.
+
+```{r}
+library(GGally)
+library(ggplot2)
+t <- ggpairs(tea, mapping = aes(), lower = list(combo = wrap("facethist", bins = 20)))
+t
+```
+
+Obviously there are too many variables to make any sense of the data.
+We will choose some of them to keep, and we ignore the rest.
+
+
+```{r}
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+tea_time <- select(tea, one_of(keep_columns))
+summary(tea_time)
+```
+
+There are three different kinds of tea, you can drink it alone, with lemon, with milk, or with something else. It can 
+be packed in a tea bag, unpackaged tea bag, or it can be unpackaged. The tea can be drunk with or without sugar. The 
+tea can be drunk in a chain store, a tea shop or a combination of those two. It can be drunk combined with the lunch 
+or separate. The most drank tea is Earl Grey, alone, in a tea bag, without suga, in a chain store not combined with a 
+lunch.
+
+```{r}
+library(tidyr); library(dplyr); library(ggplot2)
+gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+```
+
+This is a graphical way of showing the same interpretation.
+These graphs can be used to identify variable categories with a very low frequency. These types of variables can distort the analysis and should be removed.
+
+Multiple Correspondence Analysis, a data analysis technique for nominal categorical data for detecting and representing underlying structures in a dataset. Data is represented as points in a low-dimensional Euclidean space.
+The graphs above can be used to identify variable categories with a very low frequency. These types of variables can distort the analysis and should be removed.
+
+```{r}
+mca <- MCA(tea_time, graph = FALSE)
+summary(mca)
+```
+
+Eigenvalues, the percentage of variances explained by each principal component.
+
+                       
+                       Dim.1   Dim.2   Dim.3   Dim.4   Dim.5   Dim.6   Dim.7   Dim.8   Dim.9  Dim.10  Dim.11
+                       
+Variance               0.279   0.261   0.219   0.189   0.177   0.156   0.144   0.141   0.117   0.087   0.062
+
+% of var.             15.238  14.232  11.964  10.333   9.667   8.519   7.841   7.705   6.392   4.724   3.385
+
+Cumulative % of var.  15.238  29.471  41.435  51.768  61.434  69.953  77.794  85.500  91.891  96.615 100.000
+
+
+Dim1 explains 15%, Dim2 14%, Dim3 12% and so on. Dim1 to Dim4 together cover more than 50% of the variance.
+
+```{r}
+plot(mca, invisible=c("ind"), habillage = "quali")
+```
+
+Different colors identify different variable categories, and the values of them are shown as values.
+The distance between any points gives a measure of their similarity (or dissimilarity). Points with similar profile are closed on the factor map. As analyzed earlier non lunch is is more similar than lunch, or chain store than tea shop.

@@ -11,8 +11,6 @@ output:
     fig_height: 4
 ---
 
-***
-
 # Introduction to Open Data Science - Course Project
 
 ```{r child = "chapter1.Rmd"}
@@ -26,7 +24,7 @@ output:
 ```
 
 ***
-``````{r child = "chapter3.Rmd"}
+```{r child = "chapter3.Rmd"}
 # This will include Chapter 3 (that is updated in its own file) in the document.
 
 ```
@@ -38,5 +36,13 @@ output:
 # This will include Chapter 4 (that is updated in its own file) in the document.
 
 ```
+
+***
+
+
+```{r child = "chapter5.Rmd"}
+# This will include Chapter 5 (that is updated in its own file) in the document.
+
 ```
+
 
